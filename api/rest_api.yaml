@@ -1,0 +1,327 @@
+---
+openapi: 3.0.0
+info:
+  title: Social Network API
+  description: API for managing user interactions in social network.
+  version: 1.0.0
+servers:
+- url: https://virtserver.swaggerhub.com/GOLDENPOINT2000/social_network_system_design/1.0.0
+  description: SwaggerHub API Auto Mocking
+tags:
+- name: Friends
+  description: Operations related to managing user's friends
+- name: User Profile
+  description: Operations related to user profiles
+- name: Posts
+  description: Operations related to posts
+- name: Media
+  description: Operations related to media files
+- name: Feeds
+  description: Operations related to viewing feeds
+- name: Messaging
+  description: Operations related to messaging
+paths:
+  /users/{userId}/friends:
+    get:
+      tags:
+      - Friends
+      summary: Get a list of user's friends
+      parameters:
+      - name: userId
+        in: path
+        description: Unique identifier of the user
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: Limits the number of results returned
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: offset
+        in: query
+        description: Skips a number of results
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: A successful response contains a list of friends.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendListResponse'
+  /users/{userId}/friends/{friendId}:
+    post:
+      tags:
+      - Friends
+      summary: Add a friend
+      parameters:
+      - name: userId
+        in: path
+        description: Unique identifier of the user who is adding a friend
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: friendId
+        in: path
+        description: Unique identifier of the user being added as a friend
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Friend successfully added
+    delete:
+      tags:
+      - Friends
+      summary: Remove a friend
+      parameters:
+      - name: userId
+        in: path
+        description: Unique identifier of the user who is removing a friend
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: friendId
+        in: path
+        description: Unique identifier of the friend being removed
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Friend successfully removed
+  /users/{userId}:
+    get:
+      tags:
+      - User Profile
+      summary: View a user's profile
+      parameters:
+      - name: userId
+        in: path
+        description: Unique identifier of the user whose profile is being viewed
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: A successful response contains the user's profile information.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+  /posts:
+    post:
+      tags:
+      - Posts
+      summary: Publish a post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewPostRequest'
+        required: true
+      responses:
+        "200":
+          description: Post successfully published
+  /media/upload:
+    post:
+      tags:
+      - Media
+      summary: Upload media files for posts
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/media_upload_body'
+        required: true
+      responses:
+        "200":
+          description: Media file successfully uploaded
+  /feeds/{userId}:
+    get:
+      tags:
+      - Feeds
+      summary: View a user's post feed
+      parameters:
+      - name: userId
+        in: path
+        description: Unique identifier of the user whose feed is being viewed
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: A successful response contains a list of posts.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostFeedResponse'
+  /dialogs:
+    get:
+      tags:
+      - Messaging
+      summary: View user dialogs and chats
+      responses:
+        "200":
+          description: A successful response contains a list of dialogs and chats.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DialogListResponse'
+  /dialogs/{dialogId}/messages:
+    get:
+      tags:
+      - Messaging
+      summary: Read messages in a dialog or chat
+      parameters:
+      - name: dialogId
+        in: path
+        description: Unique identifier of the dialog or chat
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: A successful response contains a list of messages.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageListResponse'
+    post:
+      tags:
+      - Messaging
+      summary: Send a message in a dialog or chat
+      parameters:
+      - name: dialogId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewMessageRequest'
+        required: true
+      responses:
+        "200":
+          description: Message successfully sent
+components:
+  schemas:
+    FriendListResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+        friends:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserProfile'
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        avatarUrl:
+          type: string
+    NewPostRequest:
+      type: object
+      properties:
+        content:
+          type: string
+        mediaUrls:
+          type: array
+          items:
+            type: string
+    PostFeedResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+        posts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Post'
+    DialogListResponse:
+      type: object
+      properties:
+        dialogs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Dialog'
+    MessageListResponse:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+    NewMessageRequest:
+      type: object
+      properties:
+        content:
+          type: string
+    Dialog:
+      type: object
+      properties:
+        id:
+          type: string
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserProfile'
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+        sender:
+          $ref: '#/components/schemas/UserProfile'
+        content:
+          type: string
+    Post:
+      type: object
+      properties:
+        id:
+          type: string
+        author:
+          $ref: '#/components/schemas/UserProfile'
+        content:
+          type: string
+        mediaUrls:
+          type: array
+          items:
+            type: string
+    media_upload_body:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
